@@ -1,102 +1,117 @@
-import java.util.Scanner;
+import javax.swing.*; // for the graphics
+import java.awt.*;// for layout and color
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-public class Chess {
-    public static void main(String[] args) {
-        char[][] board = new char[8][8]; // create the 2d array
-        initializeBoard(board); // set up the initial condition of the board
-        printBoard(board); // print the board to display it
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            printBoard(board);
-            System.out.println("Enetr the Piece,s current Position(Row and column):");
-            int currentRow = scanner.nextInt();
-            int currentCol = scanner.nextInt();
+// define the Chesss Classs(blueprint)
+public class Chess extends JFrame {
 
-            System.out.println("Enter the piece's new position(row and column):");
-            int newRow = scanner.nextInt();
-            int newCol = scanner.nextInt();
+    private JLabel[][] tiles = new JLabel[8][8]; // 2D array to store tiles
+    private Point selectedTile = null; // keep track of the selected tile
 
-            if (isMoveValid(board, currentRow, currentCol, newRow, newCol)) {
-                makeMove(board, currentRow, currentCol, newRow, newCol);
-            } else {
-                System.out.println("Invalid move! Try again.");
-            }
+    // Constructor: sets up the screen
+    public Chess() {
+        // set the title of the window
+        setTitle("Chess Game");
 
-        }
+        // Set the size of the screen(width x height)
 
-    }
+        setSize(800, 800);
+        // set the behaviour for the claose operation
 
-    // isMoveValid method
-    public static boolean isMoveValid(char[][] board, int currentRow, int currentCol, int newRow, int newCol) {
-        // Validation for the move to stay within the board
-        if (currentRow < 0 || currentRow >= 8 || currentCol < 0 || currentCol >= 8 || newRow < 0 || newRow >= 8
-                || newCol < 0 || newCol >= 8) {
-            return false;
-        }
-        // Check if the piece exists at the current position
-        char piece = board[currentRow][currentCol];
-        if (piece == '\u0000') {
-            return false;
-        }
-        return true; // if the move passes the above checks then it is valid
-    }
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    // make the move
+        // Create the ChessBoard
 
-    public static void makeMove(char[][] board, int currentRow, int currentCol, int newRow, int newCol) {
-        board[newRow][newCol] = board[currentRow][currentCol]; // move the piece to new position
-        board[currentRow][currentCol] = '\u0000'; // claer the old position
-    }
+        JPanel chessBoard = new JPanel();
+        chessBoard.setLayout(new GridLayout(8, 8));
 
-    // Initialize the board
-    public static void initializeBoard(char[][] board) {
-        // Pawns
-        for (int i = 0; i < 8; i++) {
-            board[1][i] = 'P'; // position for white pawns
-            board[6][i] = 'P'; // position for black pawns
-        }
+        // Add tiles to the board
 
-        // Rooks
-        board[0][0] = 'R'; // white rooks
-        board[0][7] = 'R';
-        board[7][0] = 'r'; // black rooks
-        board[7][7] = 'r';
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                JPanel tile = new JPanel(); // create a tile
 
-        // Knights
-        board[0][1] = 'N'; // White knights
-        board[0][6] = 'N';
-
-        board[7][1] = 'n'; // Black knights
-        board[7][7] = 'n';
-        // Bishops
-        board[0][2] = 'B'; // white bishops
-        board[0][5] = 'B';
-
-        board[7][2] = 'b'; // Black bishops
-        board[7][5] = 'b';
-        // Queens
-        board[0][3] = 'Q'; // white queen
-        board[7][3] = 'q'; // Black quenn
-        // Kings
-        board[0][4] = 'K'; // White king
-        board[7][4] = 'K'; // Black King
-    }
-
-    // print the board
-    public static void printBoard(char[][] board) {
-        for (int i = 0; i < 8; i++) { // Loop through each row
-            for (int j = 0; j < 8; j++) { // Loop through each column
-                char piece = board[i][j];
-                if (piece == '\u0000') { // if no piece is present
-                    System.out.print(". ");
-
+                // Alternate colors for black and white squares
+                if ((row + col) % 2 == 0) {
+                    tile.setBackground(Color.WHITE);
                 } else {
-                    System.out.print(piece + " "); // Print the piece
+                    tile.setBackground(Color.GRAY);
                 }
+                JLabel label = new JLabel("", SwingConstants.CENTER); // Label for Chess Pieces
+                tiles[row][col] = label; // store the label in the array
+                tile.add(label); // Add label to the tile
+                chessBoard.add(tile); // Add tile to the board
+
+                // Add MouseListener to the tile
+
+                // Add MouseListener to the tile
+
+                int finalRow = row;
+                int finalCol = col;
+
+                tile.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+
+                    }
+                });
             }
-            System.out.println();// move to next line
 
         }
 
+        // Initialize chess pieces
+        initializePieces();
+        // add the chessBoard to the window
+        add(chessBoard);
+        // Make the window visisble
+        setVisible(true);
+
     }
+
+    private void initializePieces() {
+        // Place the pawns
+        for (int col = 0; col < 8; col++) {
+            tiles[6][col].setText("\u2659"); // Unicode for White pawn
+
+        }
+
+        // Place black pawns
+
+        for (int col = 0; col < 8; col++) {
+            tiles[1][col].setText("\u265F");
+
+        }
+
+        // Place other white pieces
+
+        tiles[7][0].setText("\u2656");// rook
+        tiles[7][7].setText("\u2656");
+        tiles[7][1].setText("\u2658");// knight
+        tiles[7][6].setText("\u2658");
+        tiles[7][2].setText("\u2657");// bishop
+        tiles[7][5].setText("\u2657");
+        tiles[7][3].setText("\u2655");// queen
+        tiles[7][4].setText("\u2654");// king
+
+        // Place other Black pieces
+        tiles[0][0].setText("\u265C");// rook
+        tiles[0][7].setText("\u265C");
+        tiles[0][1].setText("\u265E");// knight
+        tiles[0][6].setText("\u265E");
+        tiles[0][2].setText("\u265D");// bishop
+        tiles[0][5].setText("\u265D");
+        tiles[0][3].setText("\u265B");// queen
+        tiles[0][4].setText("\u265A");// king
+
+    }
+
+    // main method : Where the program will starts
+
+    public static void main(String[] args) {
+        // create an object of the chess class
+
+        new Chess();
+    }
+
 }
