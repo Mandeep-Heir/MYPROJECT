@@ -1,12 +1,14 @@
 import javax.swing.*; // for the graphics
 import java.awt.*;// for layout and color
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter; //  To listen mouse events
+import java.awt.event.MouseEvent; // For mouse click handling
+import java.awt.event.MouseListener;
 
 // define the Chesss Classs(blueprint)
 public class Chess extends JFrame {
-
     private JLabel[][] tiles = new JLabel[8][8]; // 2D array to store tiles
+    private boolean isWhiteTurn;
+    private String[][] board;
     private Point selectedTile = null; // keep track of the selected tile
 
     // Constructor: sets up the screen
@@ -21,6 +23,9 @@ public class Chess extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // Attach the mouse handler
+        PawnMouseHandler mouseHandler = new PawnMouseHandler(board, isWhiteTurn);
+        addMouseListener(mouseHandler);
         // Create the ChessBoard
 
         JPanel chessBoard = new JPanel();
@@ -42,10 +47,6 @@ public class Chess extends JFrame {
                 tiles[row][col] = label; // store the label in the array
                 tile.add(label); // Add label to the tile
                 chessBoard.add(tile); // Add tile to the board
-
-                // Add MouseListener to the tile
-
-                // Add MouseListener to the tile
 
                 int finalRow = row;
                 int finalCol = col;
@@ -112,6 +113,7 @@ public class Chess extends JFrame {
         // create an object of the chess class
 
         new Chess();
+
     }
 
 }
