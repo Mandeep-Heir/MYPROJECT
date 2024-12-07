@@ -24,7 +24,7 @@ public class Chess extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Attach the mouse handler
-        PawnMouseHandler mouseHandler = new PawnMouseHandler(board, isWhiteTurn);
+        PawnMouseHandler mouseHandler = new PawnMouseHandler(tiles, isWhiteTurn);
         addMouseListener(mouseHandler);
         // Create the ChessBoard
 
@@ -51,12 +51,7 @@ public class Chess extends JFrame {
                 int finalRow = row;
                 int finalCol = col;
 
-                tile.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-
-                    }
-                });
+                tile.addMouseListener(mouseHandler);
             }
 
         }

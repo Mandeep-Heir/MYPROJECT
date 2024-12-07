@@ -2,14 +2,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.JLabel;
+
 public class PawnMouseHandler extends MouseAdapter {
-    private String[][] board; // The chessboard
+    private JLabel[][] board; // The chessboard
 
     private int selectedX = -1; // selected pawn's row
     private int selectedY = -1; // selected pawn's column
-    private boolean isWhiteTurn; // Track whose turn it is(true = white, false = black)
+    private boolean isWhiteTurn = true; // Track whose turn it is(true = white, false = black)
 
-    public PawnMouseHandler(String[][] board, boolean isWhiteTurn) {
+    public PawnMouseHandler(JLabel[][] board, boolean isWhiteTurn) {
         this.board = board; // Reference to the main board
         this.isWhiteTurn = isWhiteTurn; // Initialize the current turn
     }
