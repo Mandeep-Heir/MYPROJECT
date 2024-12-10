@@ -1,102 +1,105 @@
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
 import javax.swing.JLabel;
 
 public class PawnMouseHandler extends MouseAdapter {
-    private JLabel[][] board; // The chessboard
+  private JLabel[][] tiles;
+  private boolean isWhiteTurn;
+  private Point selectedTile = null;
 
-    private int selectedX = -1; // selected pawn's row
-    private int selectedY = -1; // selected pawn's column
-    private boolean isWhiteTurn = true; // Track whose turn it is(true = white, false = black)
+  public PawnMouseHandler(JLabel[][] tiles, boolean isWhiteTurn) {
+    this.tiles = tiles;
+    this.isWhiteTurn = isWhiteTurn;
+  }
 
-    public PawnMouseHandler(JLabel[][] board, boolean isWhiteTurn) {
-        this.board = board; // Reference to the main board
-        this.isWhiteTurn = isWhiteTurn; // Initialize the current turn
-    }
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    JLabel clickedLabel = (JLabel) e.getSource();
+    int row = -1, col = -1;
 
-    @Override
-
-    public void mouseClicked(MouseEvent e) {
-        int squareSize = e.getComponent().getWidth() / 8; // Size of each square
-        int x = e.getY() / squareSize; // row indexx of the click
-        int y = e.getX() / squareSize; // column index of the click
-
-        if (selectedX == -1 && selectedY == -1) {
-            // First click: Select a piece
-
-            if (isValidSelection(x, y)) {
-                selectedX = x;
-                selectedY = y;
-
-                System.out.println("Selected pawn at:(" + x + ", " + y + ")");
-
-            } else {
-                // Second Click: Attempt to move
-
-                System.out.println("Attempting to move to:(" + x + ", " + y + ")");
-                if (isValidPawnMove(selectedX, selectedY, x, y)) {
-                    movePawn(selectedX, selectedY, x, y); // Perform the move
-                    System.out.println("Move successful!");
-                    isWhiteTurn = !isWhiteTurn; // Switch turns
-                } else {
-                    System.out.println("Invalid move!");
-                }
-
-                // Reset selection
-                selectedX = -1;
-                selectedY = -1;
-
-            }
+    // Find which tile was clicked
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (tiles[i][j] == clickedLabel) {
+          row = i;
+          col = j;
+          break;
         }
-
+      }
     }
 
-    // Check if the selected piece is a valid pawn for the current player
-    private boolean isValidSelection(int x, int y) {
-        if (board[x][y].equals("\u2659") && isWhiteTurn)
-
-            return true; // White Pawn
-        if (board[x][y].equals("\u265F") && !isWhiteTurn)
-            return true; // Black pawn
-        return false; // not a valid selection
-    }
-    // validate the pawn's movement
-
-    private boolean isValidPawnMove(int startX, int startY, int endX, int endY) {
-        boolean isWhite = board[startX][startY].equals("\u2659"); // check if its a white pawn
-        int direction = isWhite ? -1 : 1; // white moves up(-1), black moves down(+1)
-        // Forward move: One square forward
-
-        if (endY == startY && endX == startX + direction && board[endX][endY].equals("")) {
-            return true;
-        }
-
-        // First move: two squares forward
-        if (endY == startY && endX == startX + 2 * direction && (isWhite && startX == 6 || !isWhite && startX == 1) &&
-                board[startX + direction][startY].equals("") && board[endX][endY].equals("")) {
-            return true;
-        }
-
-        // Capture move: one square diagonally forward
-
-        if (Math.abs(endY - startY) == 1 && endX == startX + direction && !board[endX][endY].equals("")) {
-            return true;
-
-        }
-
-        // Invalid move
-
-        return false;
+    if (row == -1 || col == -1) {
+      System.out.println("Error: Clicked outside the valid board!");
+      return;
     }
 
-    // move the pawn to the new position
+    System.out.println("Clicked on tile: (" + row + ", " + col + ")");
 
-    private void movePawn(int startX, int startY, int endX, int endY) {
-        board[endX][endY] = board[startX][startY]; // Move the piece
-        board[startX][startY] = ""; // clear the original square
+    if (selectedTile == null) {
+      // First click: Select a piece
+      if (isPawn(row, col)) {
+        selectedTile = new Point(row, col);
+        System.out.println("Selected pawn at: (" + row + ", " + col + ")");
+      } else {
+        System.out.println("No pawn selected. Try again.");
+      }
+    } else {
+      // Second click: Attempt to move the piece
+      int startRow = selectedTile.x;
+      int startCol = selectedTile.y;
 
+      if (isValidPawnMove(startRow, startCol, row, col)) {
+        movePawn(startRow, startCol, row, col);
+        selectedTile = null; // Reset selection
+        isWhiteTurn = !isWhiteTurn; // Switch turns
+        System.out.println("Move successful!");
+      } else {
+        System.out.println("Invalid move! Try again.");
+        selectedTile = null; // Reset selection
+      }
+    }
+  }
+
+  private boolean isPawn(int row, int col) {
+    String piece = tiles[row][col].getText();
+    System.out.println("Checking if tile (" + row + ", " + col + ") contains a pawn. Found: " + piece);
+    return isWhiteTurn ? "\u2659".equals(piece) : "\u265F".equals(piece);
+  }
+
+  private boolean isValidPawnMove(int startRow, int startCol, int endRow, int endCol) {
+    int direction = isWhiteTurn ? -1 : 1;
+
+    // Forward move (1 square)
+    if (endRow == startRow + direction && endCol == startCol && tiles[endRow][endCol].getText().isEmpty()) {
+      return true;
     }
 
+    // Forward move (2 squares on first move)
+    if ((isWhiteTurn && startRow == 6 || !isWhiteTurn && startRow == 1) &&
+        endRow == startRow + 2 * direction && endCol == startCol &&
+        tiles[startRow + direction][startCol].getText().isEmpty() && tiles[endRow][endCol].getText().isEmpty()) {
+      return true;
+    }
+
+    // Capture move (diagonal)
+    if (endRow == startRow + direction && Math.abs(endCol - startCol) == 1 &&
+        !tiles[endRow][endCol].getText().isEmpty() &&
+        isOpponentPiece(tiles[endRow][endCol].getText())) {
+      return true;
+    }
+
+    return false; // Invalid move
+  }
+
+  private boolean isOpponentPiece(String piece) {
+    return isWhiteTurn ? "\u265F".equals(piece) : "\u2659".equals(piece);
+  }
+
+  private void movePawn(int startRow, int startCol, int endRow, int endCol) {
+    System.out.println("Moving pawn from (" + startRow + ", " + startCol + ") to (" + endRow + ", " + endCol + ")");
+    tiles[endRow][endCol].setText(tiles[startRow][startCol].getText());
+    tiles[startRow][startCol].setText("");
+    System.out.println("Pawn moved successfully.");
+  }
 }
