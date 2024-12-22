@@ -1,97 +1,33 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.*; // provides GUI
 
-public class Calculator extends JFrame implements ActionListener {
-    private JTextField display;
-    private String currentInput = "";
-    private String Operator = "";
-    private double result = 0;
+import java.awt.*; // 
 
-    public Calculator() {
-        setTitle("Calculator");
-        setSize(400, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(null);
-        setVisible(true);
+public class Calculator { // main container
+    private JFrame jframe; // jframe variable for setting up the jframe
+    private JTextField textfield;
 
-        // Display field
+    public Calculator() { // constructor of the main class that contains all the components to obtain the
+                          // jframe and textfield
+        // making the JFrame
 
-        JTextField display = new JTextField();
-        display.setBounds(20, 20, 340, 50);
-        display.setFont(new Font("Arial", Font.BOLD, 24));
-        display.setHorizontalAlignment(SwingConstants.RIGHT);
-        display.setEditable(false);
-        add(display);
-        // Buttons
+        jframe = new JFrame("Calculator"); // setting up the title
+        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // closes the window when we exit
+        jframe.setSize(500, 500); // setting the size of window
+        jframe.setVisible(true); // make the screen visible
 
-        String[] buttons = {
-                "7", "8", "9", "/",
-                "4", "5", "6", "*",
-                "1", "2", "3", "-",
-                "C", "0", "=", "+"
+        // making the textfiled
 
-        };
-
-        int x = 20, y = 100;
-        for (int i = 0; i < buttons.length; i++) {
-            JButton button = new JButton(buttons[i]);
-            button.setBounds(x, y, 80, 60);
-            button.setFont(new Font("Arial", Font.BOLD, 20));
-            add(button);
-
-            x += 90;
-            if ((i + 1) % 4 == 0) {
-                x = 20;
-                y += 70;
-
-            }
-
-        }
+        textfield = new JTextField();
+        textfield.setBounds(50, 25, 300, 50); // position and Size
+        textfield.setFont(new Font("Arial", Font.BOLD, 18)); // Font styling
+        textfield.setEditable(false); // make it read only
+        jframe.add(textfield); // add the text field to the frame
 
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String command = e.getActionCommand();
+    public static void main(String[] args) { // main entry point
+        new Calculator(); //
 
-        if ("0123456789".contains(command)) {
-            currentInput += command;
-            display.setText(currentInput);
-        } else if ("/-*+".contains(command)) {
-            Operator = command;
-            result = Double.parseDouble(currentInput);
-            currentInput = "";
-        } else if (command.equals("=")) {
-            double secondOperand = Double.parseDouble(currentInput);
-            switch (Operator) {
-                case "+":
-                    result += secondOperand;
-                    break;
-                case "-":
-                    result -= secondOperand;
-                    break;
-                case "*":
-                    result *= secondOperand;
-                    break;
-                case "/":
-                    result /= secondOperand;
-
-            }
-
-            display.setText(String.valueOf(result));
-            currentInput = "";
-        } else if (command.equals("C")) {
-            currentInput = "";
-            Operator = "";
-            result = 0;
-            display.setText("");
-        }
-    }
-
-    public static void main(String[] args) {
-
-        new Calculator();
     }
 
 }

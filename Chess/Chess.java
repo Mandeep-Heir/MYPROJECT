@@ -1,110 +1,132 @@
-import javax.swing.*; // for the graphics
-import java.awt.*;// for layout and color
+import javax.swing.*;
 
-// define the Chesss Classs(blueprint)
-public class Chess extends JFrame {
-    private JLabel[][] tiles = new JLabel[8][8]; // 2D array to store tiles
-    private boolean isWhiteTurn;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-    // Constructor: sets up the screen
-    public Chess() {
-        // set the title of the window
-        setTitle("Chess Game");
+public class Chess {
 
-        // Set the size of the screen(width x height)
+    private static JLabel selectedPiece = null; // to store the selected piece
+    private static JPanel[][] squares = new JPanel[8][8]; // to keep track of all squares on the board
+    private static int selectedRow = -1;
+    private static int selectedCol = -1;
 
-        setSize(800, 800);
-        // set the behaviour for the claose operation
+    public static void main(final String[] args) {
+        final JFrame frame = new JFrame("Chess");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 800);
+        frame.setVisible(true);
+        final JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(8, 8));
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Colors
+        final Color lightColor = Color.WHITE;
+        final Color darkColor = Color.GRAY;
 
-        // Create the ChessBoardA
+        // load the chess piece images
 
-        JPanel chessBoard = new JPanel();
-        chessBoard.setLayout(new GridLayout(8, 8));
+        final ImageIcon WhitePawn = new ImageIcon("Resources/WP.png");
+        final ImageIcon WhiteKing = new ImageIcon("Resources/WK.png");
+        final ImageIcon BlackPawn = new ImageIcon("Resources/BP.png");
+        final ImageIcon BlackKing = new ImageIcon("Resources/BK.png");
+        final ImageIcon WhiteRook = new ImageIcon("Resources/WR.png");
+        final ImageIcon BlackRook = new ImageIcon("Resources/BR.png");
+        final ImageIcon WhiteQueen = new ImageIcon("Resources/WQ.png");
+        final ImageIcon BlackQueen = new ImageIcon("Resources/BQ.png");
+        final ImageIcon WhiteKnight = new ImageIcon("Resources/WKN.png");
+        final ImageIcon BlackKnight = new ImageIcon("Resources/BKN.png");
+        final ImageIcon WhiteBishop = new ImageIcon("Resources/WB.png");
+        final ImageIcon BlackBishop = new ImageIcon("Resources/BB.png");
 
-        // Add tiles to the board
+        // Add squares and pieces based on index
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                JPanel tile = new JPanel(); // create a tile
+                final JPanel square = new JPanel(new BorderLayout());
 
-                // Alternate colors for black and white squares
+                // Alternate square colors
+
                 if ((row + col) % 2 == 0) {
-                    tile.setBackground(Color.WHITE);
+                    square.setBackground(lightColor);
                 } else {
-                    tile.setBackground(Color.GRAY);
+                    square.setBackground(darkColor);
                 }
-                JLabel label = new JLabel("", SwingConstants.CENTER); // Label for Chess Pieces
-                tiles[row][col] = label; // store the label in the array
-                tile.add(label); // Add label to the tile
-                chessBoard.add(tile); // Add tile to the board
 
+                // Add pieces based on their positions
+
+                final JLabel pieceLabel = new JLabel();
+                if (row == 1) { // BlackPawns
+                    pieceLabel.setIcon(BlackPawn);
+                } else if (row == 6) { // White Pawns
+                    pieceLabel.setIcon(WhitePawn);
+                } else if (row == 0 && (col == 0 || col == 7)) { // Black rooks
+                    pieceLabel.setIcon(BlackRook);
+                } else if (row == 7 && (col == 0 || col == 7)) { // White rooks
+                    pieceLabel.setIcon(WhiteRook);
+                } else if (row == 0 && (col == 1 || col == 6)) { // Black knights
+                    pieceLabel.setIcon(BlackKnight);
+                } else if (row == 7 && (col == 1 || col == 6)) { // White knights
+                    pieceLabel.setIcon(WhiteKnight);
+                } else if (row == 0 && (col == 2 || col == 5)) { // Black bishops
+                    pieceLabel.setIcon(BlackBishop);
+                } else if (row == 7 && (col == 2 || col == 5)) { // White bishops
+                    pieceLabel.setIcon(WhiteBishop);
+                } else if (row == 0 && col == 3) { // Black queen
+                    pieceLabel.setIcon(BlackQueen);
+                } else if (row == 7 && col == 3) { // White queen
+                    pieceLabel.setIcon(WhiteQueen);
+                } else if (row == 0 && col == 4) { // Black king
+                    pieceLabel.setIcon(BlackKing);
+                } else if (row == 7 && col == 4) { // White king
+                    pieceLabel.setIcon(WhiteKing);
+                }
+
+                // Add the piece label to the square
+
+                square.add(pieceLabel);
+                // Add mouse listener for the movemnet
+                square.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        handleSquareClick(square,  row, col);
+                    }
+
+                   
+                });
+
+                // Add the square to the chessboard
+
+                panel.add(square);
             }
 
         }
 
-        // Initialize chess pieces
-        initializePieces();
+        frame.add(panel, BorderLayout.CENTER);
+    }
 
-        // Attach the mouse handler
-        PawnMouseHandler mouseHandler = new PawnMouseHandler(tiles, isWhiteTurn);
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                tiles[row][col].addMouseListener(mouseHandler);
+    private static void handleSquareClick(final JPanel square, final int row, final int col) {
+        if (selectedPiece == null) {
+            // First click: Select the piece
+            if (square.getComponentCount() > 0) {
+                selectedPiece = (JLabel) square.getComponent(0); // Get the piece
+                selectedRow = row;
+                selectedCol = col;
+                square.remove(selectedPiece); // Temporarily remove it
+                square.revalidate();
+                square.repaint();
+                System.out.println("Piece selected at: " + row + ", " + col);
             }
-        }
-        // add the chessBoard to the window
-        add(chessBoard);
-        // Make the window visisble
-        setVisible(true);
-
-    }
-
-    private void initializePieces() {
-        // Place the pawns
-        for (int col = 0; col < 8; col++) {
-            tiles[6][col].setText("\u2659"); // Unicode for White pawn
+        } else {
+            // Second click: Move the piece
+            square.add(selectedPiece); // Add the piece to the target square
+            selectedPiece = null; // Clear the selection
+            selectedRow = -1;
+            selectedCol = -1;
+            square.revalidate();
+            square.repaint();
+            System.out.println("Piece moved to: " + row + ", " + col);
 
         }
 
-        // Place black pawns
-
-        for (int col = 0; col < 8; col++) {
-            tiles[1][col].setText("\u265F");
-
-        }
-
-        // Place other white pieces
-
-        tiles[7][0].setText("\u2656");// rook
-        tiles[7][7].setText("\u2656");
-        tiles[7][1].setText("\u2658");// knight
-        tiles[7][6].setText("\u2658");
-        tiles[7][2].setText("\u2657");// bishop
-        tiles[7][5].setText("\u2657");
-        tiles[7][3].setText("\u2655");// queen
-        tiles[7][4].setText("\u2654");// king
-
-        // Place other Black pieces
-        tiles[0][0].setText("\u265C");// rook
-        tiles[0][7].setText("\u265C");
-        tiles[0][1].setText("\u265E");// knight
-        tiles[0][6].setText("\u265E");
-        tiles[0][2].setText("\u265D");// bishop
-        tiles[0][5].setText("\u265D");
-        tiles[0][3].setText("\u265B");// queen
-        tiles[0][4].setText("\u265A");// king
-
     }
-
-    // main method : Where the program will starts
-
-    public static void main(String[] args) {
-        // create an object of the chess class
-
-        new Chess();
-
-    }
-
 }
