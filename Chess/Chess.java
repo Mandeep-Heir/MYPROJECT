@@ -5,10 +5,10 @@ import java.awt.event.MouseEvent;
 
 public class Chess {
 
-    private static JPanel[][] squares = new JPanel[8][8]; // Store the squares for interaction
+    private static JPanel[][] squares = new JPanel[8][8]; // Chessboard squares
     private static JLabel[][] pieces = new JLabel[8][8]; // Track pieces on the board
-    private static int selectedRow = -1; // Selected row index
-    private static int selectedCol = -1; // Selected column index
+    private static int selectedRow = -1; // Selected piece row index
+    private static int selectedCol = -1; // Selected piece column index
 
     public static void main(final String[] args) {
         final JFrame frame = new JFrame("Chess");
@@ -18,37 +18,29 @@ public class Chess {
         final JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(8, 8));
 
-        // Colors
+        // Colors for the chessboard squares
         final Color lightColor = Color.WHITE;
         final Color darkColor = Color.GRAY;
 
-        // Load the chess piece images
+        // Load chess piece images
         final ImageIcon WhitePawn = new ImageIcon("Resources/WP.png");
         final ImageIcon BlackPawn = new ImageIcon("Resources/BP.png");
         final ImageIcon WhiteRook = new ImageIcon("Resources/WR.png");
         final ImageIcon BlackRook = new ImageIcon("Resources/BR.png");
         final ImageIcon WhiteQueen = new ImageIcon("Resources/WQ.png");
         final ImageIcon BlackQueen = new ImageIcon("Resources/BQ.png");
-        final ImageIcon WhiteKnight = new ImageIcon("Resources/WKN.png");
-        final ImageIcon BlackKnight = new ImageIcon("Resources/BKN.png");
         final ImageIcon WhiteBishop = new ImageIcon("Resources/WB.png");
         final ImageIcon BlackBishop = new ImageIcon("Resources/BB.png");
-        final ImageIcon WhiteKing = new ImageIcon("Resources/WK.png");
-        final ImageIcon BlackKing = new ImageIcon("Resources/BK.png");
 
-        // Add squares and pieces based on index
+        // Initialize chessboard
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 final JPanel square = new JPanel(new BorderLayout());
 
                 // Alternate square colors
-                if ((row + col) % 2 == 0) {
-                    square.setBackground(lightColor);
-                } else {
-                    square.setBackground(darkColor);
-                }
+                square.setBackground((row + col) % 2 == 0 ? lightColor : darkColor);
 
-                // Add pieces based on their positions
+                // Add pieces based on positions
                 final JLabel pieceLabel = new JLabel();
                 if (row == 1) { // Black Pawns
                     pieceLabel.setIcon(BlackPawn);
@@ -58,30 +50,22 @@ public class Chess {
                     pieceLabel.setIcon(BlackRook);
                 } else if (row == 7 && (col == 0 || col == 7)) { // White Rooks
                     pieceLabel.setIcon(WhiteRook);
-                } else if (row == 0 && (col == 1 || col == 6)) { // Black Knights
-                    pieceLabel.setIcon(BlackKnight);
-                } else if (row == 7 && (col == 1 || col == 6)) { // White Knights
-                    pieceLabel.setIcon(WhiteKnight);
-                } else if (row == 0 && (col == 2 || col == 5)) { // Black Bishops
-                    pieceLabel.setIcon(BlackBishop);
-                } else if (row == 7 && (col == 2 || col == 5)) { // White Bishops
-                    pieceLabel.setIcon(WhiteBishop);
                 } else if (row == 0 && col == 3) { // Black Queen
                     pieceLabel.setIcon(BlackQueen);
                 } else if (row == 7 && col == 3) { // White Queen
                     pieceLabel.setIcon(WhiteQueen);
-                } else if (row == 0 && col == 4) { // Black King
-                    pieceLabel.setIcon(BlackKing);
-                } else if (row == 7 && col == 4) { // White King
-                    pieceLabel.setIcon(WhiteKing);
+                } else if (row == 0 && (col == 2 || col == 5)) { // Black Bishops
+                    pieceLabel.setIcon(BlackBishop);
+                } else if (row == 7 && (col == 2 || col == 5)) { // White Bishops
+                    pieceLabel.setIcon(WhiteBishop);
                 }
 
-                // Store the square and piece for interaction
+                // Store the square and piece
                 squares[row][col] = square;
                 pieces[row][col] = pieceLabel;
                 square.add(pieceLabel);
 
-                // Add a mouse listener for interaction
+                // Add mouse listener for interaction
                 final int currentRow = row;
                 final int currentCol = col;
 
@@ -92,7 +76,6 @@ public class Chess {
                     }
                 });
 
-                // Add the square to the chessboard
                 panel.add(square);
             }
         }
@@ -100,62 +83,105 @@ public class Chess {
         frame.add(panel, BorderLayout.CENTER);
     }
 
-    // Handle clicks for moving pawns
+    // Handle square clicks
     private static void handleSquareClick(int row, int col) {
         if (selectedRow == -1 && selectedCol == -1) {
-            // Select the piece
+            // Select piece
             if (pieces[row][col].getIcon() != null) {
                 selectedRow = row;
                 selectedCol = col;
                 squares[row][col].setBackground(Color.YELLOW); // Highlight selected square
+                highlightLegalMoves(row, col);
             }
         } else {
-            // Attempt to move the selected piece
-            if (isValidPawnMove(selectedRow, selectedCol, row, col)) {
-                // Move the piece
+            // Move piece if valid
+            if (isValidMove(selectedRow, selectedCol, row, col)) {
                 pieces[row][col].setIcon(pieces[selectedRow][selectedCol].getIcon());
                 pieces[selectedRow][selectedCol].setIcon(null);
-
-                // Reset square colors
-                resetSquareColors();
-
-                // Deselect
-                selectedRow = -1;
-                selectedCol = -1;
-            } else {
-                // Invalid move, deselect
-                resetSquareColors();
-                selectedRow = -1;
-                selectedCol = -1;
             }
+
+            resetSquareColors(); // Reset colors
+            selectedRow = -1;
+            selectedCol = -1;
         }
     }
 
-    // Validate pawn movement
-    private static boolean isValidPawnMove(int oldRow, int oldCol, int newRow, int newCol) {
+    // Validate moves
+    private static boolean isValidMove(int oldRow, int oldCol, int newRow, int newCol) {
         if (pieces[oldRow][oldCol].getIcon() == null)
-            return false; // No piece selected
+            return false;
 
         ImageIcon pieceIcon = (ImageIcon) pieces[oldRow][oldCol].getIcon();
-        if (pieceIcon.getDescription().contains("WP")) {
-            // White pawn movement logic
-            return newRow == oldRow - 1 && oldCol == newCol && pieces[newRow][newCol].getIcon() == null;
-        } else if (pieceIcon.getDescription().contains("BP")) {
-            // Black pawn movement logic
-            return newRow == oldRow + 1 && oldCol == newCol && pieces[newRow][newCol].getIcon() == null;
+        String pieceDescription = pieceIcon.getDescription();
+
+        if (pieceDescription.contains("WR") || pieceDescription.contains("BR")) {
+            return isValidRookMove(oldRow, oldCol, newRow, newCol);
+        } else if (pieceDescription.contains("WB") || pieceDescription.contains("BB")) {
+            return isValidBishopMove(oldRow, oldCol, newRow, newCol);
+        } else if (pieceDescription.contains("WQ") || pieceDescription.contains("BQ")) {
+            return isValidQueenMove(oldRow, oldCol, newRow, newCol);
+        }
+
+        return false; // Default to invalid move
+    }
+
+    // Rook movement logic
+    private static boolean isValidRookMove(int oldRow, int oldCol, int newRow, int newCol) {
+        if (oldRow == newRow) {
+            int start = Math.min(oldCol, newCol);
+            int end = Math.max(oldCol, newCol);
+            for (int i = start + 1; i < end; i++) {
+                if (pieces[oldRow][i].getIcon() != null)
+                    return false; // Blocked
+            }
+            return true;
+        } else if (oldCol == newCol) {
+            int start = Math.min(oldRow, newRow);
+            int end = Math.max(oldRow, newRow);
+            for (int i = start + 1; i < end; i++) {
+                if (pieces[i][oldCol].getIcon() != null)
+                    return false; // Blocked
+            }
+            return true;
         }
         return false;
+    }
+
+    // Bishop movement logic
+    private static boolean isValidBishopMove(int oldRow, int oldCol, int newRow, int newCol) {
+        if (Math.abs(newRow - oldRow) == Math.abs(newCol - oldCol)) {
+            int rowDirection = (newRow - oldRow) / Math.abs(newRow - oldRow);
+            int colDirection = (newCol - oldCol) / Math.abs(newCol - oldCol);
+            for (int i = 1; i < Math.abs(newRow - oldRow); i++) {
+                if (pieces[oldRow + i * rowDirection][oldCol + i * colDirection].getIcon() != null)
+                    return false; // Blocked
+            }
+            return true;
+        }
+        return false;
+    }
+
+    // Queen movement logic
+    private static boolean isValidQueenMove(int oldRow, int oldCol, int newRow, int newCol) {
+        return isValidRookMove(oldRow, oldCol, newRow, newCol) || isValidBishopMove(oldRow, oldCol, newRow, newCol);
+    }
+
+    // Highlight legal moves
+    private static void highlightLegalMoves(int row, int col) {
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                if (isValidMove(row, col, r, c)) {
+                    squares[r][c].setBackground(Color.GREEN);
+                }
+            }
+        }
     }
 
     // Reset square colors
     private static void resetSquareColors() {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                if ((row + col) % 2 == 0) {
-                    squares[row][col].setBackground(Color.WHITE);
-                } else {
-                    squares[row][col].setBackground(Color.GRAY);
-                }
+                squares[row][col].setBackground((row + col) % 2 == 0 ? Color.WHITE : Color.GRAY);
             }
         }
     }

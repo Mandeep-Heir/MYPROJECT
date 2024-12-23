@@ -1,61 +1,25 @@
 package Entities;
 
 public class Employee {
-    private int EmployeeId;
+
+    private int EmployeeID;
     private String Name;
     private int Age;
     private String Department;
-    private Double Salary;
+    private double Salary;
 
-    // Getters and Setters
+    // getters and setters
 
-    public int getEmployeeId() {
-        return EmployeeId;
-    }
-
-    public void setEmployeeId(int EmployeeId) {
-        this.EmployeeId = EmployeeId;
+public  int getEmployeeID() {
+        return EmployeeID;
 
     }
 
-    public String getName(String Name) {
-        return Name;
-
+    public void setEmployeeID() {
+        this.EmployeeID = EmployeeID;
     }
+             0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 
-    public void setName(String Name) {
-        this.Name = Name;
-    }
 
-    public int getAge() {
-        return Age;
-
-    }
-
-    public void setAge(int Age) {
-        this.Age = Age;
-
-    }
-
-    public String getDepartment() {
-        return Department;
-
-    }
-
-    public void setDepartment(String Department) {
-        this.Department = Department;
-
-    }
-
-    public Double getSalary() {
-        return Salary;
-
-    }
-
-    public void setSalary(Double Salary) {
-        this.Salary = Salary;
-    }
-
-    Employee employee = new Employee();
 
 }
